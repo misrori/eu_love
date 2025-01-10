@@ -1,0 +1,6 @@
+pandas
+plotly
+streamlit
+numpy==1.26.4
+setuptools
+ipython
