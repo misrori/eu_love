@@ -38,6 +38,9 @@ def show_full_data():
     }
     filtered_df = df[list(display_columns.keys())]
     filtered_df = filtered_df.rename(columns=display_columns)
-    st.dataframe(filtered_df)
+    st.dataframe(filtered_df.head(2000))
+    
+    st.markdown("## Adatok letöltése")
+    st.markdown("A teljes adathalmaz letölthető az [itt](https://github.com/misrori/eu_love/raw/refs/heads/main/all_eu_money.xlsx)")
 
 show_full_data()
