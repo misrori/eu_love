@@ -1,104 +1,94 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
-@st.cache_data()
+if 'grouped_df' not in st.session_state:
+    st.session_state.grouped_df = None    
+
+@st.cache_data(ttl=3600*24)
 def read_data():
-    df = pd.read_parquet('eu_money/all_eu_money.parquet')
+    df = pd.read_parquet('all_eu_money.parquet')
     df = df.loc[df['megitelt_tamogatas'].notna()]
+    df['megitelt_tamogatas'] = df['megitelt_tamogatas'].astype(int)
     df = df.sort_values(by='megitelt_tamogatas', ascending=False)
+    df['tam_dont_datum'] = pd.to_datetime(df['tam_dont_datum'], format='%Y.%m.%d').dt.date
+    df['megitelt_tamogatas_eve'] = pd.to_datetime(df['tam_dont_datum'], format='%Y.%m.%d').dt.year
+    df.reset_index(drop=True, inplace=True)
     return df
 df = read_data()
 
 
 
 @st.fragment
-def show_stock_filter():
-
-    # Oszlop leírások
+def show_grouped_data():
+    st.markdown("#### Ebben a részben csoportosíthatod az adatokat, és megtekintheted az eredményeket.")
+    
     column_descriptions = {
+        'palyazo_neve': 'Pályázó neve',
         'fejlesztesi_program_nev': 'Fejlesztési program neve',
         'forras': 'Forrás',
-        'kiiras_eve': 'Kiírás éve',
         'op_kod': 'Operatív program kódja',
         'konstrukcio_nev': 'Konstrukció neve',
         'konstrukcio_kod': 'Konstrukció kódja',
-        'palyazo_neve': 'Pályázó neve',
-        'projekt_cime': 'Projekt címe',
         'megval_regio_nev': 'Megvalósítási régió neve',
         'megval_megye_nev': 'Megvalósítási megye neve',
         'kisterseg_nev': 'Kistérség neve',
         'helyseg_nev': 'Helység neve',
-        'tam_dont_datum': 'Támogatási döntés dátuma',
-        'megitelt_tamogatas': 'Megítélt támogatás',
-        'id_palyazat': 'Pályázat azonosítója',
-        'load_date': 'Betöltési dátum',
-        'jaras_nev': 'Járás neve'
+        'jaras_nev': 'Járás neve',
+        'megitelt_tamogatas_eve': 'Megítélt támogatás éve'
     }
 
-    # Oszlopok sorrendje
-    filter_column_order = list(column_descriptions.keys())
-
-    # Visszafelé leképezés a leírásokhoz
     reverse_mapping = {v: k for k, v in column_descriptions.items()}
-
-    # Multi-select widget a szűrni kívánt oszlopok kiválasztásához
     selected_descriptions = st.multiselect("Válassz oszlopokat:", list(column_descriptions.values()))
-
-    # Kiválasztott leírások leképezése az eredeti oszlopnevekre
     selected_columns = [reverse_mapping[desc] for desc in selected_descriptions]
 
-    # Dinamikus szűrők megjelenítése a kiválasztott oszlopok alapján
-    filters = {}
-    for col in selected_columns:
-        if df[col].dtype in ['float64', 'int64']:
-            min_value, max_value = float(df[col].min()), float(df[col].max())
-            value_range = st.slider(
-                f"Válassz értéktartományt - {column_descriptions[col]}",
-                min_value=min_value,
-                max_value=max_value,
-                value=(min_value, max_value)
-            )
-            filters[col] = value_range
-        else:
-            unique_values = df[col].unique().tolist()
-            selected_values = st.multiselect(f"Válassz értékeket - {column_descriptions[col]}", unique_values)
-            filters[col] = selected_values
-
-    # Szűrők alkalmazása a DataFrame-re
-    filtered_df = df.copy()
-    for col, condition in filters.items():
-        if df[col].dtype in ['float64', 'int64']:
-            filtered_df = filtered_df[(filtered_df[col] >= condition[0]) & (filtered_df[col] <= condition[1])]
-        elif condition:
-            filtered_df = filtered_df[filtered_df[col].isin(condition)]
-
-
-    # Szűrt DataFrame megjelenítése
-    if len(filtered_df) > 0:
-        st.dataframe(filtered_df)
-    else:
-        st.write("Nincsenek megfelelő adatok a megadott szűrők alapján.")
-        
-      # Csoportosításhoz oszlopok kiválasztása
-    selected_group_descriptions = st.multiselect(
-        "Válassz oszlopokat csoportosításhoz:",
-        list(column_descriptions.values())
-    )
-    selected_group_columns = [reverse_mapping[desc] for desc in selected_group_descriptions]
-
-    
-    
-    # Csoportosítás és összegzés végrehajtása
     if st.button("Csoportosítás"):
-        if selected_group_columns:
-            grouped_df = (filtered_df
-            .groupby(selected_group_columns, as_index=False)
-            .agg(megitelt_tamogatas = ('megitelt_tamogatas', 'sum'))
-            .sort_values(by='megitelt_tamogatas', ascending=False)
-            .reset_index()
-            )
-            st.dataframe(grouped_df, hide_index=True)
+        if selected_columns:
+            grouped_df = (df
+                          .groupby(selected_columns, as_index=False)
+                          .agg(
+                              megitelt_tamogatas=('megitelt_tamogatas', 'sum'),
+                              number_of_projects=('megitelt_tamogatas', 'count')
+                          )
+                          .sort_values(by='megitelt_tamogatas', ascending=False)
+                          )
+            grouped_df = grouped_df.rename(columns=column_descriptions)
+            grouped_df = grouped_df.rename(columns={'megitelt_tamogatas': 'Megítélt támogatás', 'number_of_projects': 'Projektek száma'})
+            grouped_df.reset_index(drop=True, inplace=True)
+            st.dataframe(grouped_df)
+            st.session_state.grouped_df = grouped_df
     else:
         st.write("Válassz legalább egy oszlopot a csoportosításhoz.")
+    
+    # display grouped data
+    if st.session_state.grouped_df is not None:
+        grouped_df = st.session_state.grouped_df
+        
+        col1, col2, col3, col4 = st.columns(4)
 
-show_stock_filter()
+        with col1:
+            x_axis = st.selectbox("X tengely:", grouped_df.columns, index=0)
+        with col2:
+            y_axis = st.selectbox("Y tengely:", grouped_df.columns, index=2)
+        # if data has at least 5 columns, display color selector
+        if grouped_df.shape[1] > 3:
+            with col3:
+                color = st.selectbox("Szín:", grouped_df.columns, index=None)
+        else:
+            color = None
+        with col4:
+            top_n = st.number_input("Megjelenítendő sorok száma:", min_value=1, max_value=len(grouped_df), value=100 if len(grouped_df) > 100 else len(grouped_df))
+        
+        if color:
+            fig = px.bar(grouped_df.head(top_n), x=x_axis, y=y_axis, color=color,
+                        title=f'Megítélt támogatások csoportosítása {x_axis} szerint' )
+            fig.update_layout( xaxis_title=x_axis, yaxis_title=y_axis, height=900, legend_title=color)  
+
+        else: 
+            fig = px.bar(grouped_df.head(top_n), x=x_axis, y=y_axis,
+                            title=f'Megítélt támogatások csoportosítása {x_axis} szerint' )
+            fig.update_layout( xaxis_title=x_axis, yaxis_title=y_axis, height=900)  
+        st.plotly_chart(fig)
+
+
+show_grouped_data()

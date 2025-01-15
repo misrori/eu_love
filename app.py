@@ -1,8 +1,7 @@
 import streamlit as st
-from goldhand import *
 
 
-st.set_page_config( layout="wide", page_title="EU Finance",page_icon="📊",)
+st.set_page_config( layout="wide", page_title="EU-s projektek - Átlátszó",page_icon="📊",)
 
 
 # --- INTRO ---
@@ -15,10 +14,27 @@ about_page = st.Page(
 
 # --- STOCK ---
 adat_page = st.Page(
-    "views/data_watch.py",
-    title="Adatok",
+    "views/full_data.py",
+    title="Teljes Adat",
     icon=":material/trending_up:",
 )
+
+# --- elemzse ---
+group_page = st.Page(
+    "views/data_watch.py",
+    title="Elemzés",
+    icon=":material/trending_up:",
+)
+
+
+
+# maps
+map_data = st.Page(
+    "views/map_megye.py",
+    title="Térképes elemzés",
+    icon=":material/trending_up:",
+)
+
 
 
 
@@ -26,18 +42,19 @@ adat_page = st.Page(
 pg = st.navigation(
     {
         "Info": [about_page],
-        "Adat": [adat_page],
+        "Adat": [adat_page, group_page],
+        "Térkép": [map_data],
     }
 )
 
 
 # --- SHARED ON ALL PAGES ---
 st.logo(
-    'https://i.ibb.co/Pgw52bM/Screenshot-from-2024-12-26-09-41-17-removebg-preview.png',
-    link="https://goldhandfinance.streamlit.app/",
+    'https://atlatszo.hu/wp-content/themes/atlatszo2021/i/atlatszo-logo.svg',
+    link="https://atlatszo.hu/",
     size="large")
 
-st.sidebar.markdown("valami  [Átlátszó.hu](https://atlatszo.hu)")
+st.sidebar.markdown("[Támogatom a munkátokat!](https://atlatszo.hu/tamogatom/)")
 
 
 # --- RUN NAVIGATION ---

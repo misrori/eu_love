@@ -4,3 +4,9 @@ streamlit
 numpy==1.26.4
 setuptools
 ipython
+branca
+folium
+geopandas
+streamlit-folium
+openpyxl
+matplotlib
