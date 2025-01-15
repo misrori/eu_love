@@ -10,6 +10,9 @@ import matplotlib.pyplot as plt
 
 
 def get_map(filtered_df, map_type, incude_bp=True):
+    base_lon = 20
+    base_lat =47.14
+    
     if map_type == "regio":
         # group by megye
         regio_money = (
@@ -50,7 +53,7 @@ def get_map(filtered_df, map_type, incude_bp=True):
             caption="Megitélt támogatás régió szinten",
         )
 
-        m = folium.Map(location=[47.3, 19.6], zoom_start=8, max_lat=50, max_lon=20)
+        m = folium.Map(location=[base_lat, base_lon], zoom_start=8)
 
         popup = folium.GeoJsonPopup(
             fields=["regio", "megitelt_tamogatas_text" ],
@@ -129,7 +132,7 @@ def get_map(filtered_df, map_type, incude_bp=True):
             caption="Megitélt támogatás megye szinten",
         )
 
-        m = folium.Map(location=[47.3, 19.6], zoom_start=8, max_lat=50, max_lon=20)
+        m = folium.Map(location=[base_lat, base_lon], zoom_start=8)
 
         popup = folium.GeoJsonPopup(
             fields=["megye", "megitelt_tamogatas_text"],
@@ -211,7 +214,7 @@ def get_map(filtered_df, map_type, incude_bp=True):
             caption="Megitélt támogatás kistérség szinten",
         )
 
-        m = folium.Map(location=[47.3, 19.6], zoom_start=8, max_lat=50, max_lon=20)
+        m = folium.Map(location=[base_lat, base_lon], zoom_start=8)
 
         popup = folium.GeoJsonPopup(
             fields=['kisterseg', "megitelt_tamogatas_text",  'megye', 'regio'],
@@ -294,7 +297,7 @@ def get_map(filtered_df, map_type, incude_bp=True):
             caption="Megitélt támogatás város szinten",
         )
 
-        m = folium.Map(location=[47.3, 19.6], zoom_start=8, max_lat=50, max_lon=20)
+        m = folium.Map(location=[base_lat, base_lon], zoom_start=8)
 
         popup = folium.GeoJsonPopup(
             fields=["varos", "megitelt_tamogatas_text", 'kisterseg', 'megye', 'regio'],
