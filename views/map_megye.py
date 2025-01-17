@@ -385,30 +385,30 @@ def show_map():
             # create filter for fejlesztesi program neve, forrás, nyerter top 200, megitelt év
             st.markdown("## Szűrés")
             
-            filter_for_fejlesztesi_program_neve = st.checkbox("Filter fejlesztesi program neve")
+            filter_for_fejlesztesi_program_neve = st.checkbox("Fejlesztesi program neve")
             
             if filter_for_fejlesztesi_program_neve:
                 # filter by fejlesztesi program neve
                 fejlesztesi_program_neve = st.multiselect(
                     "Válassz fejlesztési programot:",
                     list(df['fejlesztesi_program_nev'].unique()),
-                    default=None,
+                    default=None, placeholder=  "Válassz legalább egy fejlesztési programot!"
                 )
-            filter_for_forras = st.checkbox("Filter forrás")
+            filter_for_forras = st.checkbox("Forrás")
             if filter_for_forras:        
                 # filter by forras
                 forras = st.multiselect(
                     "Válassz forrást:",
                     list(df['forras'].unique()),
-                    default=None,
+                    default=None, placeholder=  "Válassz legalább egy forrást!"
                 )
-            filter_for_megitelt_ev = st.checkbox("Filter megitéslés éve")
+            filter_for_megitelt_ev = st.checkbox("Megítélés éve")
             # numeric slider from 2004 to 2025
             
             
             if filter_for_megitelt_ev:
                 # filter by megitelt év
-                megitelt_ev_slider = st.slider("Válassz megitelt évet:", 2004, 2025, (2004, 2025))
+                megitelt_ev_slider = st.slider("Válassz megítélt évet:", 2004, 2025, (2004, 2025))
                 megitelt_ev = list(range(megitelt_ev_slider[0], megitelt_ev_slider[1]+1))
 
             

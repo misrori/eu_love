@@ -50,11 +50,8 @@ def get_infoplots(df):
         barmode='stack',
         plot_bgcolor='white',
         xaxis_title='Év',
-        yaxis_title='Megitélt támogatás összege (Milliárd  Ft)',
+        yaxis_title='Megitélt támogatás összege (milliárd  Ft)',
         legend_title='Fejlesztési program',
-        xaxis=dict(
-            tickangle=45
-        ),
         height=800
     )
 
@@ -69,25 +66,22 @@ def get_infoplots(df):
             megitelt_tamogatas=('megitelt_tamogatas', 'sum'),
             number_of_projects=('megitelt_tamogatas', 'count')
         )    
-        .sort_values(by='megitelt_tamogatas', ascending=False)
+        .sort_values(by='megitelt_tamogatas', ascending=True)
         .reset_index()
     )
     # show it in millárd
     grouped_df['megitelt_tamogatas'] = grouped_df['megitelt_tamogatas'] / 1000000000
 
     # Adatok ábrázolása Plotlyval
-    fig = px.bar(grouped_df, x='fejlesztesi_program_nev', y='megitelt_tamogatas',
+    fig = px.bar(grouped_df, y='fejlesztesi_program_nev', x='megitelt_tamogatas',
                 labels={'fejlesztesi_program_nev': 'Fejlesztesi program nev', 'megitelt_tamogatas': 'Megítélt támogatás (milliárd Ft)'},
-                title='Megítélt támogatás (milliárd Ft) fejlesztesi programonként')
+                title='Megítélt támogatás (milliárd Ft) fejlesztesi programonként', orientation='h' )
     # update the background to white
     fig.update_layout(
         barmode='stack',
         plot_bgcolor='white',
-        xaxis_title='Fejlesztési program',
-        yaxis_title='Megitélt támogatás (Milliárd  Ft)',
-        xaxis=dict(
-            tickangle=45
-        ),
+        yaxis_title='Fejlesztési program',
+        xaxis_title='Megitélt támogatás (milliárd  Ft)',
         height=600
     )
 
@@ -102,25 +96,23 @@ def get_infoplots(df):
             megitelt_tamogatas=('megitelt_tamogatas', 'sum'),
             number_of_projects=('megitelt_tamogatas', 'count')
         )    
-        .sort_values(by='megitelt_tamogatas', ascending=False)
+        .sort_values(by='megitelt_tamogatas', ascending=True)
         .reset_index()
     )
     # show it in millárd
     grouped_df['megitelt_tamogatas'] = grouped_df['megitelt_tamogatas'] / 1000000000
 
     # Adatok ábrázolása Plotlyval
-    fig = px.bar(grouped_df, x='megval_regio_nev', y='megitelt_tamogatas',
+    fig = px.bar(grouped_df, y='megval_regio_nev', x='megitelt_tamogatas',
                 labels={'megval_regio_nev': 'Régió', 'megitelt_tamogatas': 'Megítélt támogatás (milliárd Ft)'},
-                title='Megítélt támogatás (milliárd Ft) régiónként')
+                title='Megítélt támogatás (milliárd Ft) régiónként', orientation='h')
     # update the background to white
     fig.update_layout(
         barmode='stack',
         plot_bgcolor='white',
-        xaxis_title='Régió',
-        yaxis_title='Megitélt támogatás (Milliárd  Ft)',
-        xaxis=dict(
-            tickangle=45
-        )
+        yaxis_title='Régió',
+        xaxis_title='Megitélt támogatás (milliárd  Ft)',
+
     )
     plot3 = fig
 ############################################################################xx
@@ -132,25 +124,23 @@ def get_infoplots(df):
             megitelt_tamogatas=('megitelt_tamogatas', 'sum'),
             number_of_projects=('megitelt_tamogatas', 'count')
         )    
-        .sort_values(by='megitelt_tamogatas', ascending=False)
+        .sort_values(by='megitelt_tamogatas', ascending=True)
         .reset_index()
     )
     # show it in millárd
     grouped_df['megitelt_tamogatas'] = grouped_df['megitelt_tamogatas'] / 1000000000
 
     # Adatok ábrázolása Plotlyval
-    fig = px.bar(grouped_df, x='megval_megye_nev', y='megitelt_tamogatas',
+    fig = px.bar(grouped_df, y='megval_megye_nev', x='megitelt_tamogatas',
                 labels={'megval_megye_nev': 'Megye', 'megitelt_tamogatas': 'Megítélt támogatás (milliárd Ft)'},
-                title='Megítélt támogatás (milliárd Ft) megyénként')
+                title='Megítélt támogatás (milliárd Ft) megyénként', orientation='h')
     # update the background to white
     fig.update_layout(
         barmode='stack',
         plot_bgcolor='white',
-        xaxis_title='Megye',
-        yaxis_title='Megitélt támogatás (Milliárd  Ft)',
-        xaxis=dict(
-            tickangle=45
-        )
+        yaxis_title='Megye',
+        xaxis_title='Megitélt támogatás (milliárd  Ft)',
+
     )
     plot4 = fig
 ############################################################################xx
@@ -172,17 +162,17 @@ def get_infoplots(df):
     # Adatok ábrázolása Plotlyval
     fig = px.bar(grouped_df, x='palyazo_neve', y='megitelt_tamogatas',
                 labels={'palyazo_neve': 'Pályázó neve', 'megitelt_tamogatas': 'Megítélt támogatás (milliárd Ft)'},
-                title='Top 50 legtöbb támogatást elnyerő pályázó ')
+                title='Top 50 pályázó ')
     # update the background to white
     fig.update_layout(
         barmode='stack',
         plot_bgcolor='white',
         xaxis_title='Pályázó',
-        yaxis_title='Megitélt támogatás (Milliárd  Ft)',
+        yaxis_title='Megitélt támogatás (milliárd  Ft)',
         xaxis=dict(
-            tickangle=45
+            tickangle=-45
         ),
-        height=1000
+        height=1300
     )
     plot5 = fig
 ############################################################################xx

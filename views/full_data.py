@@ -21,7 +21,7 @@ df = read_data()
 def show_full_data():
     st.markdown("## Az első 2000 nyertes projekt")
     display_columns = {
-        'megitelt_tamogatas': 'Megítélt támogatás',
+        'megitelt_tamogatas': 'Megítélt támogatás (Ft)',
         'palyazo_neve': 'Pályázó neve',
         'projekt_cime': 'Projekt címe',
         'tam_dont_datum': 'Támogatási döntés dátuma',
@@ -40,6 +40,6 @@ def show_full_data():
     filtered_df = filtered_df.rename(columns=display_columns)
     st.dataframe(filtered_df.head(2000))
     
-    st.markdown("## A teljes adathalmaz letölthető az [itt](https://github.com/misrori/eu_love/raw/refs/heads/main/all_eu_money.xlsx)")
+    st.markdown("## A teljes adathalmaz letölthető [itt.](https://github.com/misrori/eu_love/raw/refs/heads/main/all_eu_money.xlsx)")
 
 show_full_data()
