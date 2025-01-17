@@ -5,6 +5,7 @@ import folium
 import streamlit as st
 from streamlit_folium import st_folium
 from folium.plugins import Fullscreen
+from folium.plugins import Search
 import matplotlib.pyplot as plt
 
 
@@ -42,25 +43,37 @@ def get_map(filtered_df, map_type, incude_bp=True):
             no_info_text = None
 
         if incude_bp==False:
-                regio_map.loc[regio_map["regio"] == "Közép-Magyarország", 'megitelt_tamogatas'] = 0
+                regio_map.loc[regio_map["regio"] == "Közép-Magyarország", 'megitelt_tamogatas'] = None
 
+        regio_map['megitelt_tamogatas_milliard'] = regio_map['megitelt_tamogatas'] / 1000000000
 
         # Using the RdYlGn colormap from matplotlib
         colormap = branca.colormap.LinearColormap(
-            vmin=regio_map["megitelt_tamogatas"].quantile(0.0),
-            vmax=regio_map["megitelt_tamogatas"].quantile(1),
+            vmin=regio_map["megitelt_tamogatas_milliard"].quantile(0.0) ,
+            vmax=regio_map["megitelt_tamogatas_milliard"].quantile(1) ,
             colors=[plt.cm.Reds(i / 255) for i in range(256)],
-            caption="Megitélt támogatás régió szinten",
-        )
+            caption="Megítélt támogatás régió szinten",
+        ).to_step(n=6)  # Összesen 6 lépés, hogy ne legyen túl zsúfolt
 
-        m = folium.Map(location=[base_lat, base_lon], zoom_start=8)
+        # Az osztások számának és címkéinek formázása
+        colormap.caption = "Megítélt támogatás (Milliárd Ft)"
+        colormap.format = "{:.0f}"  # Egész számok formátuma
+
+        # Színskála hozzáadása a térképhez
+
+        m = folium.Map(location=[base_lat, base_lon], zoom_start=8, min_zoom=7, max_zoom=18, tiles="Cartodb Positron",)
 
         popup = folium.GeoJsonPopup(
             fields=["regio", "megitelt_tamogatas_text" ],
             aliases=["Régió", "Megitélt támogatás" ],
             localize=False,
             labels=True,
-            style="background-color: yellow;",
+            style="""
+                background-color: #F0EFEF;
+                border: 5px solid grey;
+                border-radius: 5px;
+                box-shadow: 5px;
+            """,
 
         )
 
@@ -72,27 +85,40 @@ def get_map(filtered_df, map_type, incude_bp=True):
             labels=True,
             style="""
                 background-color: #F0EFEF;
-                border: 2px solid black;
-                border-radius: 3px;
-                box-shadow: 3px;
+                border: 5px solid grey;
+                border-radius: 5px;
+                box-shadow: 5px;
             """,
             max_width=800,
         )
-        g = folium.GeoJson(
+        regio_layer = folium.GeoJson(
             regio_map,
             style_function=lambda x: {
-                "fillColor": colormap(x["properties"]["megitelt_tamogatas"])
-                if x["properties"]["megitelt_tamogatas"] is not None
+                "fillColor": colormap(x["properties"]["megitelt_tamogatas_milliard"])
+                if x["properties"]["megitelt_tamogatas_milliard"] is not None
                 else "transparent",
-                "color": "black",
-                "fillOpacity": 0.4,
+                "color": "gray",
+                "weight": 1,  # Poligon határvonal vastagsága
+                "fillOpacity": 0.8
             },
             tooltip=tooltip,
             popup=popup,
         ).add_to(m)
-        colormap.add_to(m)
 
+        regio_search = Search(
+            layer=regio_layer,
+            geom_type="Polygon",
+            placeholder="Régió keresés",
+            collapsed=False,
+            search_label="regio",
+            weight=8,
+            color="red",
+        ).add_to(m)
+
+
+        colormap.add_to(m)
         return m, no_info_text
+    
     if map_type == "megye":
         # group by megye
         # group by megye
@@ -121,56 +147,82 @@ def get_map(filtered_df, map_type, incude_bp=True):
             no_info_text = None
 
         if incude_bp==False:
-            megye_map.loc[megye_map["megye"] == "Budapest", 'megitelt_tamogatas'] = 0
+            megye_map.loc[megye_map["megye"] == "Budapest", 'megitelt_tamogatas'] = None
+
+
+        megye_map['megitelt_tamogatas_milliard'] = megye_map['megitelt_tamogatas'] / 1000000000
 
 
         # Using the RdYlGn colormap from matplotlib
         colormap = branca.colormap.LinearColormap(
-            vmin=megye_map["megitelt_tamogatas"].quantile(0.0),
-            vmax=megye_map["megitelt_tamogatas"].quantile(1),
+            vmin=megye_map["megitelt_tamogatas_milliard"].quantile(0.0),
+            vmax=megye_map["megitelt_tamogatas_milliard"].quantile(1),
             colors=[plt.cm.Reds(i / 255) for i in range(256)],
             caption="Megitélt támogatás megye szinten",
-        )
+        ).to_step(n=6)  # Összesen 6 lépés, hogy ne legyen túl zsúfolt
 
-        m = folium.Map(location=[base_lat, base_lon], zoom_start=8)
+        # Az osztások számának és címkéinek formázása
+        colormap.caption = "Megítélt támogatás (Milliárd Ft)"
+        colormap.format = "{:.0f}"  # Egész számok formátuma
+
+
+        m = folium.Map(location=[base_lat, base_lon], zoom_start=8, min_zoom=7, max_zoom=18, tiles="Cartodb Positron",)
 
         popup = folium.GeoJsonPopup(
-            fields=["megye", "megitelt_tamogatas_text"],
-            aliases=["Megye", "Megitélt támogatás"],
+            fields=["megye", "megitelt_tamogatas_text" ],
+            aliases=["Megye", "Megitélt támogatás" ],
             localize=False,
             labels=True,
-            style="background-color: yellow;",
+            style="""
+                background-color: #F0EFEF;
+                border: 5px solid grey;
+                border-radius: 5px;
+                box-shadow: 5px;
+            """,
 
         )
 
         tooltip = folium.GeoJsonTooltip(
-            fields=["megye", "megitelt_tamogatas_text"],
-            aliases=["Megye", "Megitélt támogatás"],
+            fields=["megye", "megitelt_tamogatas_text" ],
+            aliases=["Megye", "Megitélt támogatás" ],
             localize=False,
             sticky=False,
             labels=True,
             style="""
                 background-color: #F0EFEF;
-                border: 2px solid black;
-                border-radius: 3px;
-                box-shadow: 3px;
+                border: 5px solid grey;
+                border-radius: 5px;
+                box-shadow: 5px;
             """,
-            max_width=600,
+            max_width=800,
         )
-        g = folium.GeoJson(
+        megye_layer = folium.GeoJson(
             megye_map,
             style_function=lambda x: {
-                "fillColor": colormap(x["properties"]["megitelt_tamogatas"])
-                if x["properties"]["megitelt_tamogatas"] is not None
+                "fillColor": colormap(x["properties"]["megitelt_tamogatas_milliard"])
+                if x["properties"]["megitelt_tamogatas_milliard"] is not None
                 else "transparent",
-                "color": "black",
-                "fillOpacity": 0.4,
+                "color": "gray",
+                "weight": 1,  # Poligon határvonal vastagsága
+                "fillOpacity": 0.8
             },
             tooltip=tooltip,
             popup=popup,
         ).add_to(m)
-        colormap.add_to(m)
 
+        megye_search = Search(
+            layer=megye_layer,
+            geom_type="Polygon",
+            placeholder="Megye keresés",
+            collapsed=False,
+            search_label="megye",
+            weight=8,
+            color = 'red'
+        ).add_to(m)
+
+
+        colormap.add_to(m)
+        folium.LayerControl().add_to(m)
         return m, no_info_text
     if map_type == "kisterseg":
 
@@ -204,55 +256,79 @@ def get_map(filtered_df, map_type, incude_bp=True):
             no_info_text = None
 
         if incude_bp==False:
-            kisterseg_map.loc[kisterseg_map["kisterseg"] == "Budapest", 'megitelt_tamogatas'] = 0
-
+            kisterseg_map.loc[kisterseg_map["kisterseg"] == "Budapest", 'megitelt_tamogatas'] = None
+            
+        kisterseg_map['megitelt_tamogatas_milliard'] = kisterseg_map['megitelt_tamogatas'] / 1000000000
 
         colormap = branca.colormap.LinearColormap(
-            vmin=kisterseg_map["megitelt_tamogatas"].quantile(0.0),
-            vmax=kisterseg_map["megitelt_tamogatas"].quantile(1),
+            vmin=kisterseg_map["megitelt_tamogatas_milliard"].quantile(0.0),
+            vmax=kisterseg_map["megitelt_tamogatas_milliard"].quantile(1),
             colors=[plt.cm.Reds(i / 255) for i in range(256)],
-            caption="Megitélt támogatás kistérség szinten",
-        )
+            caption="Megitélt támogatás megye szinten",
+        ).to_step(n=6)  # Összesen 6 lépés, hogy ne legyen túl zsúfolt
 
-        m = folium.Map(location=[base_lat, base_lon], zoom_start=8)
+        # Az osztások számának és címkéinek formázása
+        colormap.caption = "Megítélt támogatás (Milliárd Ft)"
+        colormap.format = "{:.0f}"  # Egész számok formátuma
+
+
+        m = folium.Map(location=[base_lat, base_lon], zoom_start=8, min_zoom=7, max_zoom=18, tiles="Cartodb Positron",)
 
         popup = folium.GeoJsonPopup(
-            fields=['kisterseg', "megitelt_tamogatas_text",  'megye', 'regio'],
-            aliases=['Kistérség', "Megitélt támogatás",  'Megye', 'Régió'],
+            fields=["kisterseg", "megitelt_tamogatas_text" ],
+            aliases=["Kistérség", "Megitélt támogatás" ],
             localize=False,
             labels=True,
-            style="background-color: yellow;",
+            style="""
+                background-color: #F0EFEF;
+                border: 5px solid grey;
+                border-radius: 5px;
+                box-shadow: 5px;
+            """,
 
         )
 
         tooltip = folium.GeoJsonTooltip(
-            fields=["kisterseg", "megitelt_tamogatas_text", 'megye', 'regio'],
-            aliases=["Kistérség", "Megitélt támogatás",  'Megye', 'Régió'],
+            fields=["kisterseg", "megitelt_tamogatas_text" ],
+            aliases=["Kistérség", "Megitélt támogatás" ],
             localize=False,
             sticky=False,
             labels=True,
             style="""
                 background-color: #F0EFEF;
-                border: 2px solid black;
-                border-radius: 3px;
-                box-shadow: 3px;
+                border: 5px solid grey;
+                border-radius: 5px;
+                box-shadow: 5px;
             """,
             max_width=800,
         )
-        g = folium.GeoJson(
+        kisterseg_layer = folium.GeoJson(
             kisterseg_map,
             style_function=lambda x: {
-                "fillColor": colormap(x["properties"]["megitelt_tamogatas"])
-                if x["properties"]["megitelt_tamogatas"] is not None
+                "fillColor": colormap(x["properties"]["megitelt_tamogatas_milliard"])
+                if x["properties"]["megitelt_tamogatas_milliard"] is not None
                 else "transparent",
-                "color": "black",
-                "fillOpacity": 0.4,
+                "color": "gray",
+                "weight": 1,  # Poligon határvonal vastagsága
+                "fillOpacity": 0.8
             },
             tooltip=tooltip,
             popup=popup,
         ).add_to(m)
-        colormap.add_to(m)
 
+        kisterseg_search = Search(
+            layer=kisterseg_layer,
+            geom_type="Polygon",
+            placeholder="Kistérség keresés",
+            collapsed=False,
+            search_label="kisterseg",
+            weight=8,
+            color = 'red'
+        ).add_to(m)
+
+
+        colormap.add_to(m)
+        folium.LayerControl().add_to(m)
 
         return m, no_info_text
 
@@ -287,55 +363,77 @@ def get_map(filtered_df, map_type, incude_bp=True):
             no_info_text = None
 
         if incude_bp==False:
-            varos_map.loc[varos_map["varos"] == "Budapest", 'megitelt_tamogatas'] = 0
+            varos_map.loc[varos_map["varos"] == "Budapest", 'megitelt_tamogatas'] = None
 
-
+        varos_map['megitelt_tamogatas_millio'] = varos_map['megitelt_tamogatas'] / 1000000
+        
         colormap = branca.colormap.LinearColormap(
-            vmin=varos_map["megitelt_tamogatas"].quantile(0.0),
-            vmax=varos_map["megitelt_tamogatas"].quantile(1),
+            vmin=varos_map["megitelt_tamogatas_millio"].quantile(0.0),
+            vmax=varos_map["megitelt_tamogatas_millio"].quantile(1),
             colors=[plt.cm.Reds(i / 255) for i in range(256)],
-            caption="Megitélt támogatás város szinten",
-        )
+        ).to_step(n=6)  # Összesen 6 lépés, hogy ne legyen túl zsúfolt
 
-        m = folium.Map(location=[base_lat, base_lon], zoom_start=8)
+        # Az osztások számának és címkéinek formázása
+        colormap.caption = "Megítélt támogatás (Millió Ft)"
+        colormap.format = "{:.0f}"  # Egész számok formátuma
+
+        m = folium.Map(location=[base_lat, base_lon], zoom_start=8, min_zoom=7, max_zoom=18, tiles="Cartodb Positron",)
 
         popup = folium.GeoJsonPopup(
-            fields=["varos", "megitelt_tamogatas_text", 'kisterseg', 'megye', 'regio'],
-            aliases=["Város", "Megitélt támogatás", 'Kistérség', 'Megye', 'Régió'],
+            fields=["varos", "megitelt_tamogatas_text" ],
+            aliases=["Város", "Megitélt támogatás" ],
             localize=False,
             labels=True,
-            style="background-color: yellow;",
+            style="""
+                background-color: #F0EFEF;
+                border: 5px solid grey;
+                border-radius: 5px;
+                box-shadow: 5px;
+            """,
 
         )
 
         tooltip = folium.GeoJsonTooltip(
-            fields=["varos", "megitelt_tamogatas_text", 'kisterseg', 'megye', 'regio'],
-            aliases=["Város", "Megitélt támogatás", 'Kistérség', 'Megye', 'Régió'],
+            fields=["varos", "megitelt_tamogatas_text" ],
+            aliases=["Város", "Megitélt támogatás" ],
             localize=False,
             sticky=False,
             labels=True,
             style="""
                 background-color: #F0EFEF;
-                border: 2px solid black;
-                border-radius: 3px;
-                box-shadow: 3px;
+                border: 5px solid grey;
+                border-radius: 5px;
+                box-shadow: 5px;
             """,
             max_width=800,
         )
-        g = folium.GeoJson(
+        varos_layer = folium.GeoJson(
             varos_map,
             style_function=lambda x: {
-                "fillColor": colormap(x["properties"]["megitelt_tamogatas"])
-                if x["properties"]["megitelt_tamogatas"] is not None
+                "fillColor": colormap(x["properties"]["megitelt_tamogatas_millio"])
+                if x["properties"]["megitelt_tamogatas_millio"] is not None
                 else "transparent",
-                "color": "black",
-                "fillOpacity": 0.4,
+                "color": "gray",
+                "weight": 1,  # Poligon határvonal vastagsága
+                "fillOpacity": 0.8
             },
             tooltip=tooltip,
             popup=popup,
         ).add_to(m)
-        colormap.add_to(m)
 
+        varos_search = Search(
+            layer=varos_layer,
+            geom_type="Polygon",
+            placeholder="Város keresés",
+            collapsed=False,
+            search_label="varos",
+            weight=8,
+            color = 'red'
+        ).add_to(m)
+
+
+        colormap.add_to(m)
+        folium.LayerControl().add_to(m)
 
         return m, no_info_text
 

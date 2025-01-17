@@ -7,7 +7,7 @@ st.set_page_config( layout="wide", page_title="EU-s projektek - Átlátszó",pag
 # --- INTRO ---
 about_page = st.Page(
     "views/intro.py",
-    title="About this app",
+    title="Alap elemzés",
     icon=":material/account_circle:",
     default=True,
 )
@@ -29,8 +29,8 @@ group_page = st.Page(
 
 
 # maps
-map_data = st.Page(
-    "views/map_megye.py",
+my_map = st.Page(
+    "views/map.py",
     title="Térképes elemzés",
     icon=":material/trending_up:",
 )
@@ -43,7 +43,7 @@ pg = st.navigation(
     {
         "Info": [about_page],
         "Adat": [adat_page, group_page],
-        "Térkép": [map_data],
+        "Térkép": [my_map],
     }
 )
 

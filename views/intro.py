@@ -22,8 +22,7 @@ def get_infoplots(df):
     df['tam_dont_datum'] = pd.to_datetime(df['tam_dont_datum'])
     # Extract year and month
     df['year_month'] = df['tam_dont_datum'].dt.to_period('M')
-    grouped_df= (
-        # df where tamogatas eve nagyobb 2004
+    grouped_df = (
         df[df['tam_dont_datum'].dt.year > 2004]         
         .groupby(['year_month', 'fejlesztesi_program_nev'], as_index=False)
         .agg(
@@ -33,7 +32,6 @@ def get_infoplots(df):
         .reset_index()
     )
     grouped_df['megitelt_tamogatas'] = grouped_df['megitelt_tamogatas'] / 1000000000
-
     grouped_df['year_month'] = grouped_df['year_month'].astype(str)
 
     fig = px.bar(
@@ -50,9 +48,18 @@ def get_infoplots(df):
         barmode='stack',
         plot_bgcolor='white',
         xaxis_title='Év',
-        yaxis_title='Megitélt támogatás összege (milliárd  Ft)',
-        legend_title='Fejlesztési program',
-        height=800
+        yaxis_title='Megitélt támogatás összege (milliárd Ft)',
+        legend_title='',
+        height=800,
+        legend=dict(
+            orientation="h",  # Horizontal orientation
+            yanchor="bottom",
+            y=1.02,  # Position just above the plot
+            xanchor="center",
+            x=0.5,  # Centered
+            title_font=dict(size=12),  # Adjust title font size
+            font=dict(size=10)  # Adjust legend font size
+        )
     )
 
     plot1 = fig
@@ -82,7 +89,10 @@ def get_infoplots(df):
         plot_bgcolor='white',
         yaxis_title='Fejlesztési program',
         xaxis_title='Megitélt támogatás (milliárd  Ft)',
-        height=600
+        height=600,
+        xaxis=dict(
+            tickformat=',',  # Ensure numbers are displayed fully with commas
+        )
     )
 
     plot2 = fig
@@ -112,6 +122,9 @@ def get_infoplots(df):
         plot_bgcolor='white',
         yaxis_title='Régió',
         xaxis_title='Megitélt támogatás (milliárd  Ft)',
+        xaxis=dict(
+            tickformat=',',  # Ensure numbers are displayed fully with commas
+        )
 
     )
     plot3 = fig
@@ -140,7 +153,9 @@ def get_infoplots(df):
         plot_bgcolor='white',
         yaxis_title='Megye',
         xaxis_title='Megitélt támogatás (milliárd  Ft)',
-
+        xaxis=dict(
+            tickformat=',',  # Ensure numbers are displayed fully with commas
+        )
     )
     plot4 = fig
 ############################################################################xx
@@ -170,7 +185,8 @@ def get_infoplots(df):
         xaxis_title='Pályázó',
         yaxis_title='Megitélt támogatás (milliárd  Ft)',
         xaxis=dict(
-            tickangle=-45
+            tickangle=-45,
+            tickformat=','
         ),
         height=1300
     )
